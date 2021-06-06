@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  backend:
+    # docker-composeファイルと同階層のDockerfileをビルド
+    build: .
+    ports:
+      # ローカル:Docker
+      - 8000:3000
+      # DockerとローカルのFSをマウント
+    volumes:
+      - .:/app
+    # dbを先に起動させる
+    # ただし、初回起動時はDBの準備に手間取るので、コネクトに失敗する
+    # 可能性がある
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7.22
+    # restart: always
+    environment:
+      MYSQL_DATABASE: ambassador
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: root
+    # ローカルに.dbdataを作成し、dbコンテナとFSをマウントする
+    volumes:
+      - .dbdata:/var/lib/mysql
+    ports:
+      - 33066:3306
