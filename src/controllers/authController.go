@@ -38,6 +38,9 @@ func Register(ctx *fiber.Ctx) error {
 		IsAmbassdor: false,
 	}
 
+	// パスワードセット
+	user.SetPassword(data["password"])
+
 	// ユーザー作成
 	database.DB.Create(&user)
 
@@ -62,7 +65,7 @@ func Login(ctx *fiber.Ctx) error {
 	}
 
 	// パスワードチェック
-	err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
+	err := user.ComparePassword(data["password"])
 	if err != nil {
 		ctx.Status(fiber.StatusBadRequest)
 		return ctx.JSON(fiber.Map{

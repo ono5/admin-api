@@ -19,6 +19,7 @@ func main() {
 
 	// CORSの設定
 	app.Use(cors.New(cors.Config{
+		// 認証にcookieなどの情報を必要とするかどうか
 		AllowCredentials: true,
 	}))
 
