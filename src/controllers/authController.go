@@ -101,3 +101,32 @@ func Login(ctx *fiber.Ctx) error {
 		"message": "success",
 	})
 }
+
+func User(ctx *fiber.Ctx) error {
+	// cookieから情報を取得
+	cookie := ctx.Cookies("jwt")
+
+	// token取得
+	token, err := jwt.ParseWithClaims(
+		cookie,
+		&jwt.StandardClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte("secret"), nil
+		},
+	)
+
+	if err != nil {
+		ctx.Status(fiber.StatusUnauthorized) // 401
+		return ctx.JSON(fiber.Map{
+			"message": "認証がされていません",
+		})
+	}
+
+	// useridを取得する
+	payload := token.Claims.(*jwt.StandardClaims)
+
+	// ユーザー検索
+	var user models.User
+	database.DB.Where("id = ?", payload.Subject).First(&user)
+	return ctx.JSON(user)
+}
