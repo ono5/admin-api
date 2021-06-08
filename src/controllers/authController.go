@@ -42,7 +42,13 @@ func Register(ctx *fiber.Ctx) error {
 	user.SetPassword(data["password"])
 
 	// ユーザー作成
-	database.DB.Create(&user)
+	result := database.DB.Create(&user)
+	if result.Error != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{
+			"message": "そのEmailは既に登録されています",
+		})
+	}
 
 	return ctx.JSON(user)
 }
