@@ -136,3 +136,18 @@ func User(ctx *fiber.Ctx) error {
 	database.DB.Where("id = ?", payload.Subject).First(&user)
 	return ctx.JSON(user)
 }
+
+func Logout(ctx *fiber.Ctx) error {
+	// cookieをクリアする
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour * 24), // -を指定
+		HTTPOnly: true,
+	}
+
+	ctx.Cookie(&cookie)
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+	})
+}
