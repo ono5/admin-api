@@ -19,7 +19,8 @@ func Setup(app *fiber.App) {
 
 	// Middleware
 	adminAuthenticated := admin.Use(middleware.IsAuthenticate)
-	adminAuthenticated.Post("logout", controllers.Logout)
 	adminAuthenticated.Get("user", controllers.User)
-	adminAuthenticated.Post("info", controllers.UpdateInfo)
+	adminAuthenticated.Post("logout", controllers.Logout)
+	adminAuthenticated.Put("info", controllers.UpdateInfo)
+	adminAuthenticated.Put("password", controllers.UpdatePassword)
 }

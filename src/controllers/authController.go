@@ -155,3 +155,33 @@ func UpdateInfo(ctx *fiber.Ctx) error {
 	database.DB.Model(&user).Updates(&user)
 	return ctx.JSON(user)
 }
+
+func UpdatePassword(ctx *fiber.Ctx) error {
+	var data map[string]string
+
+	// リクエストデータをパースする
+	if err := ctx.BodyParser(&data); err != nil {
+		return err
+	}
+
+	// パスワードチェック
+	if data["password"] != data["password_confirm"] {
+		ctx.Status(fiber.StatusBadRequest) // 400
+		return ctx.JSON(fiber.Map{
+			"message": "パスワードに誤りがあります",
+		})
+	}
+
+	// cookieからidを取得する
+	id, _ := middleware.GetUserID(ctx)
+	user := models.User{
+		ID: id,
+	}
+
+	// パスワードセット
+	user.SetPassword(data["password"])
+
+	// ユーザー情報更新
+	database.DB.Model(&user).Updates(&user)
+	return ctx.JSON(user)
+}
