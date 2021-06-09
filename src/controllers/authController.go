@@ -32,11 +32,11 @@ func Register(ctx *fiber.Ctx) error {
 	pwd, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 12)
 
 	user := models.User{
-		FirstName:   data["first_name"],
-		LastName:    data["last_name"],
-		Email:       data["email"],
-		Password:    pwd,
-		IsAmbassdor: false,
+		FirstName:    data["first_name"],
+		LastName:     data["last_name"],
+		Email:        data["email"],
+		Password:     pwd,
+		IsAmbassador: false,
 	}
 
 	// パスワードセット

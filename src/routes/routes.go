@@ -23,4 +23,5 @@ func Setup(app *fiber.App) {
 	adminAuthenticated.Post("logout", controllers.Logout)
 	adminAuthenticated.Put("info", controllers.UpdateInfo)
 	adminAuthenticated.Put("password", controllers.UpdatePassword)
+	adminAuthenticated.Get("ambassadors", controllers.Ambassadors)
 }
