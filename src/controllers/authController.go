@@ -4,6 +4,7 @@ package controllers
 
 import (
 	"admin/src/database"
+	"admin/src/middleware"
 	"admin/src/models"
 	"strconv"
 	"time"
@@ -109,31 +110,12 @@ func Login(ctx *fiber.Ctx) error {
 }
 
 func User(ctx *fiber.Ctx) error {
-	// cookieから情報を取得
-	cookie := ctx.Cookies("jwt")
-
-	// token取得
-	token, err := jwt.ParseWithClaims(
-		cookie,
-		&jwt.StandardClaims{},
-		func(token *jwt.Token) (interface{}, error) {
-			return []byte("secret"), nil
-		},
-	)
-
-	if err != nil {
-		ctx.Status(fiber.StatusUnauthorized) // 401
-		return ctx.JSON(fiber.Map{
-			"message": "認証がされていません",
-		})
-	}
-
-	// useridを取得する
-	payload := token.Claims.(*jwt.StandardClaims)
+	id, _ := middleware.GetUserID(ctx)
 
 	// ユーザー検索
 	var user models.User
-	database.DB.Where("id = ?", payload.Subject).First(&user)
+	database.DB.Where("id = ?", id).First(&user)
+
 	return ctx.JSON(user)
 }
 

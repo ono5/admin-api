@@ -3,6 +3,7 @@ package routes
 
 import (
 	"admin/src/controllers"
+	"admin/src/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,11 +13,12 @@ func Setup(app *fiber.App) {
 	api := app.Group("api")
 	admin := api.Group("admin")
 
-	// POST
+	// No Middleware
 	admin.Post("register", controllers.Register)
 	admin.Post("login", controllers.Login)
-	admin.Post("logout", controllers.Logout)
 
-	// GET
-	admin.Get("user", controllers.User)
+	// Middleware
+	adminAuthenticated := admin.Use(middleware.IsAuthenticate)
+	adminAuthenticated.Post("logout", controllers.Logout)
+	adminAuthenticated.Get("user", controllers.User)
 }
