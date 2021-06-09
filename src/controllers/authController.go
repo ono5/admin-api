@@ -133,3 +133,25 @@ func Logout(ctx *fiber.Ctx) error {
 		"message": "success",
 	})
 }
+
+func UpdateInfo(ctx *fiber.Ctx) error {
+	var data map[string]string
+
+	// リクエストデータをパースする
+	if err := ctx.BodyParser(&data); err != nil {
+		return err
+	}
+
+	// cookieからidを取得する
+	id, _ := middleware.GetUserID(ctx)
+	user := models.User{
+		ID:        id,
+		FirstName: data["first_name"],
+		LastName:  data["last_name"],
+		Email:     data["email"],
+	}
+
+	// ユーザー情報更新
+	database.DB.Model(&user).Updates(&user)
+	return ctx.JSON(user)
+}
