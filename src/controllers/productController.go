@@ -49,9 +49,8 @@ func UpdateProduct(ctx *fiber.Ctx) error {
 	// リクエストからIDを取得
 	id, _ := strconv.Atoi(ctx.Params("id"))
 
-	product := models.Product{
-		ID: uint(id),
-	}
+	product := models.Product{}
+	product.ID = uint(id)
 
 	if err := ctx.BodyParser(&product); err != nil {
 		return err
@@ -67,9 +66,8 @@ func DeleteProduct(ctx *fiber.Ctx) error {
 	// リクエストからIDを取得
 	id, _ := strconv.Atoi(ctx.Params("id"))
 
-	product := models.Product{
-		ID: uint(id),
-	}
+	product := models.Product{}
+	product.ID = uint(id)
 
 	// プロダクト削除
 	database.DB.Delete(&product)

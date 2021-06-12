@@ -145,11 +145,11 @@ func UpdateInfo(ctx *fiber.Ctx) error {
 	// cookieからidを取得する
 	id, _ := middleware.GetUserID(ctx)
 	user := models.User{
-		ID:        id,
 		FirstName: data["first_name"],
 		LastName:  data["last_name"],
 		Email:     data["email"],
 	}
+	user.ID = id
 
 	// ユーザー情報更新
 	database.DB.Model(&user).Updates(&user)
@@ -174,9 +174,8 @@ func UpdatePassword(ctx *fiber.Ctx) error {
 
 	// cookieからidを取得する
 	id, _ := middleware.GetUserID(ctx)
-	user := models.User{
-		ID: id,
-	}
+	user := models.User{}
+	user.ID = id
 
 	// パスワードセット
 	user.SetPassword(data["password"])
