@@ -9,15 +9,14 @@ import (
 )
 
 func Setup(app *fiber.App) {
-	// GROUP
+	// Group
 	api := app.Group("api")
-	admin := api.Group("admin")
 
-	// No Middleware
+	// admin
+	admin := api.Group("admin")
 	admin.Post("register", controllers.Register)
 	admin.Post("login", controllers.Login)
 
-	// Middleware
 	adminAuthenticated := admin.Use(middleware.IsAuthenticate)
 	adminAuthenticated.Get("user", controllers.User)
 	adminAuthenticated.Post("logout", controllers.Logout)
@@ -31,4 +30,15 @@ func Setup(app *fiber.App) {
 	adminAuthenticated.Delete("products/:id", controllers.DeleteProduct)
 	adminAuthenticated.Get("users/:id/links", controllers.Link)
 	adminAuthenticated.Get("orders", controllers.Orders)
+
+	// Ambassador
+	ambassador := api.Group("ambassador")
+	ambassador.Post("register", controllers.Register)
+	ambassador.Post("login", controllers.Login)
+
+	ambassadorAuthentication := ambassador.Use(middleware.IsAuthenticate)
+	ambassadorAuthentication.Get("user", controllers.User)
+	ambassadorAuthentication.Post("logout", controllers.Logout)
+	ambassadorAuthentication.Put("users/info", controllers.UpdateInfo)
+	ambassadorAuthentication.Put("users/password", controllers.UpdatePassword)
 }

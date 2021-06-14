@@ -7,6 +7,7 @@ import (
 	"admin/src/middleware"
 	"admin/src/models"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -36,7 +37,7 @@ func Register(ctx *fiber.Ctx) error {
 		LastName:     data["last_name"],
 		Email:        data["email"],
 		Password:     pwd,
-		IsAmbassador: false,
+		IsAmbassador: strings.Contains(ctx.Path(), "/api/ambassador"),
 	}
 
 	// パスワードセット
