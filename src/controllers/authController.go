@@ -6,11 +6,9 @@ import (
 	"admin/src/database"
 	"admin/src/middleware"
 	"admin/src/models"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -81,13 +79,26 @@ func Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	// トークンの発行
-	payload := jwt.StandardClaims{
-		Subject:   strconv.Itoa(int(user.ID)),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+	// ambassador判定
+	isAmbassador := strings.Contains(ctx.Path(), "/api/ambassador")
+
+	var scope string
+
+	if isAmbassador {
+		scope = "ambassador"
+	} else {
+		scope = "admin"
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, payload).SignedString([]byte("secret"))
+	if !isAmbassador && user.IsAmbassador {
+		ctx.Status(fiber.StatusUnauthorized) // 401
+		return ctx.JSON(fiber.Map{
+			"message": "認証が許可されていません",
+		})
+	}
+
+	token, err := middleware.GenerateJWT(user.ID, scope)
+
 	if err != nil {
 		ctx.Status(fiber.StatusBadRequest)
 		return ctx.JSON(fiber.Map{
