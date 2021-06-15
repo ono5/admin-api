@@ -128,6 +128,12 @@ func User(ctx *fiber.Ctx) error {
 	var user models.User
 	database.DB.Where("id = ?", id).First(&user)
 
+	if strings.Contains(ctx.Path(), "/api/ambassador") {
+		ambassador := models.Ambassador(user)
+		ambassador.CalculateRevenue(database.DB)
+		return ctx.JSON(ambassador)
+	}
+
 	return ctx.JSON(user)
 }
 
