@@ -4,7 +4,10 @@ package controllers
 import (
 	"admin/src/database"
 	"admin/src/models"
+	"context"
+	"encoding/json"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -73,4 +76,33 @@ func DeleteProduct(ctx *fiber.Ctx) error {
 	database.DB.Delete(&product)
 
 	return nil
+}
+
+func ProductFrontend(ctx *fiber.Ctx) error {
+	var products []models.Product
+	var c = context.Background()
+	redisKey := "products_frontend"
+	expiredTime := 30 * time.Minute
+
+	// products_frontend keyでRedisからデータを取得
+	result, err := database.Cache.Get(c, redisKey).Result()
+	if err != nil {
+		database.DB.Find(&products)
+
+		// Redisにデータを格納するため、エンコードする
+		productBytes, err := json.Marshal(&products)
+		if err != nil {
+			panic(err)
+		}
+
+		// products_fronend keyでRedisにデータを格納
+		err = database.Cache.Set(c, redisKey, productBytes, expiredTime).Err()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		// デコードする
+		json.Unmarshal([]byte(result), &products)
+	}
+	return ctx.JSON(products)
 }
