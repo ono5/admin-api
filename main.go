@@ -1,3 +1,4 @@
+// main.go
 package main
 
 import (
@@ -13,6 +14,8 @@ func main() {
 	database.Connect()
 	// Migration
 	database.AutoMigrate()
+	// Redis
+	database.SetupRedis()
 
 	// fiber API
 	app := fiber.New()
