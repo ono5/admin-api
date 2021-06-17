@@ -6,6 +6,7 @@ import (
 	"admin/src/models"
 	"context"
 	"encoding/json"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -148,6 +149,20 @@ func ProductBackend(ctx *fiber.Ctx) error {
 	} else {
 		// 検索しない場合は、全てのデータを返却
 		searchProducts = products
+	}
+
+	// ソート
+	if sortParam := ctx.Query("sort"); sortParam != "" {
+		sortLower := strings.ToLower(sortParam)
+		if sortLower == "asc" {
+			sort.Slice(searchProducts, func(i, j int) bool {
+				return searchProducts[i].Price < searchProducts[j].Price
+			})
+		} else if sortLower == "desc" {
+			sort.Slice(searchProducts, func(i, j int) bool {
+				return searchProducts[i].Price > searchProducts[j].Price
+			})
+		}
 	}
 
 	return ctx.JSON(searchProducts)
