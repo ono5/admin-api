@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -105,4 +106,49 @@ func ProductFrontend(ctx *fiber.Ctx) error {
 		json.Unmarshal([]byte(result), &products)
 	}
 	return ctx.JSON(products)
+}
+
+func ProductBackend(ctx *fiber.Ctx) error {
+	var products []models.Product
+	var c = context.Background()
+	redisKey := "products_backend"
+	expiredTime := 30 * time.Minute
+
+	// キャッシュ操作
+	result, err := database.Cache.Get(c, redisKey).Result()
+	if err != nil {
+		database.DB.Find(&products)
+
+		productBytes, err := json.Marshal(&products)
+		if err != nil {
+			panic(err)
+		}
+
+		database.Cache.Set(c, redisKey, productBytes, expiredTime).Err()
+
+	} else {
+		json.Unmarshal([]byte(result), &products)
+	}
+
+	var searchProducts []models.Product
+
+	// 検索
+	// urlの?q=XXXXから文字列を取得
+	if q := ctx.Query("q"); q != "" {
+		// 大文字小文字の区別をなくすため、全て小文字扱いにする
+		lower := strings.ToLower(q)
+		for _, product := range products {
+			// 検索条件1: Title
+			if strings.Contains(strings.ToLower(product.Title), lower) ||
+				// 検索条件2: Description
+				strings.Contains(strings.ToLower(product.Description), lower) {
+				searchProducts = append(searchProducts, product)
+			}
+		}
+	} else {
+		// 検索しない場合は、全てのデータを返却
+		searchProducts = products
+	}
+
+	return ctx.JSON(searchProducts)
 }
