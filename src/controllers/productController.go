@@ -165,5 +165,29 @@ func ProductBackend(ctx *fiber.Ctx) error {
 		}
 	}
 
-	return ctx.JSON(searchProducts)
+	// ページネーション
+	var total = len(searchProducts)
+	// デフォルトは"1"ページ
+	page, _ := strconv.Atoi(ctx.Query("page", "1"))
+	// 1ページ最大9個の商品
+	perPage := 9
+
+	var data []models.Product
+
+	if total <= page*perPage && total >= (page-1)*perPage {
+		data = searchProducts[(page-1)*perPage : total]
+	} else if total >= page*perPage {
+		data = searchProducts[(page-1)*perPage : page*perPage]
+	} else {
+		data = []models.Product{}
+	}
+
+	// 1ページ目 -> 0 ~ 8
+	// 2パージ目 -> 9 ~ 17
+	return ctx.JSON(fiber.Map{
+		"data":      data,
+		"total":     total,
+		"page":      page,
+		"last_page": total/perPage + 1,
+	})
 }
