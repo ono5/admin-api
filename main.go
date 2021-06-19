@@ -16,6 +16,8 @@ func main() {
 	database.AutoMigrate()
 	// Redis
 	database.SetupRedis()
+	// Cache
+	database.SetupCacheChannel()
 
 	// fiber API
 	app := fiber.New()

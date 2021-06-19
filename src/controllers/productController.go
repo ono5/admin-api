@@ -14,6 +14,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+var (
+	products_frontend = "products_frontend"
+	products_backend  = "products_backend"
+)
+
 func Products(ctx *fiber.Ctx) error {
 	var products []models.Product
 
@@ -33,6 +38,9 @@ func CreateProducts(ctx *fiber.Ctx) error {
 
 	// プロダクト取得
 	database.DB.Create(&product)
+
+	// キャッシュ削除(goroutineで呼び出す)
+	go database.ClearCache(products_frontend, products_backend)
 
 	return ctx.JSON(product)
 }
@@ -64,6 +72,9 @@ func UpdateProduct(ctx *fiber.Ctx) error {
 	// プロダクト更新
 	database.DB.Model(&product).Updates(&product)
 
+	// キャッシュ削除(goroutineで呼び出す)
+	go database.ClearCache(products_frontend, products_backend)
+
 	return ctx.JSON(product)
 }
 
@@ -77,17 +88,19 @@ func DeleteProduct(ctx *fiber.Ctx) error {
 	// プロダクト削除
 	database.DB.Delete(&product)
 
+	// キャッシュ削除(goroutineで呼び出す)
+	go database.ClearCache(products_frontend, products_backend)
+
 	return nil
 }
 
 func ProductFrontend(ctx *fiber.Ctx) error {
 	var products []models.Product
 	var c = context.Background()
-	redisKey := "products_frontend"
 	expiredTime := 30 * time.Minute
 
 	// products_frontend keyでRedisからデータを取得
-	result, err := database.Cache.Get(c, redisKey).Result()
+	result, err := database.Cache.Get(c, products_frontend).Result()
 	if err != nil {
 		database.DB.Find(&products)
 
@@ -98,7 +111,7 @@ func ProductFrontend(ctx *fiber.Ctx) error {
 		}
 
 		// products_fronend keyでRedisにデータを格納
-		err = database.Cache.Set(c, redisKey, productBytes, expiredTime).Err()
+		err = database.Cache.Set(c, products_frontend, productBytes, expiredTime).Err()
 		if err != nil {
 			panic(err)
 		}
@@ -112,11 +125,10 @@ func ProductFrontend(ctx *fiber.Ctx) error {
 func ProductBackend(ctx *fiber.Ctx) error {
 	var products []models.Product
 	var c = context.Background()
-	redisKey := "products_backend"
 	expiredTime := 30 * time.Minute
 
 	// キャッシュ操作
-	result, err := database.Cache.Get(c, redisKey).Result()
+	result, err := database.Cache.Get(c, products_backend).Result()
 	if err != nil {
 		database.DB.Find(&products)
 
@@ -125,7 +137,7 @@ func ProductBackend(ctx *fiber.Ctx) error {
 			panic(err)
 		}
 
-		database.Cache.Set(c, redisKey, productBytes, expiredTime).Err()
+		database.Cache.Set(c, products_backend, productBytes, expiredTime).Err()
 
 	} else {
 		json.Unmarshal([]byte(result), &products)
