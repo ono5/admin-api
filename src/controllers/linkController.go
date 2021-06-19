@@ -64,3 +64,38 @@ func CreateLink(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(link)
 }
+
+func Stats(ctx *fiber.Ctx) error {
+	// ユーザーIDを取得
+	id, _ := middleware.GetUserID(ctx)
+
+	// DB検索
+	var links []models.Link
+	database.DB.Find(&links, models.Link{
+		UserID: id,
+	})
+
+	var result []interface{}
+	var orders []models.Order
+
+	for _, link := range links {
+		// OrderItemsを先にロードしてからOrderデータを検索
+		database.DB.Preload("OrderItems").Find(&orders, &models.Order{
+			Code:     link.Code,
+			Complete: true,
+		})
+
+		var revenue float64 = 0
+		for _, order := range orders {
+			revenue += order.GetTotal()
+		}
+
+		result = append(result, fiber.Map{
+			"code":    link.Code,
+			"count":   len(orders),
+			"revenue": revenue,
+		})
+	}
+
+	return ctx.JSON(result)
+}
