@@ -2,6 +2,8 @@
 package models
 
 import (
+	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -24,6 +26,10 @@ func (u *User) SetPassword(pwd string) {
 
 func (u *User) ComparePassword(pwd string) error {
 	return bcrypt.CompareHashAndPassword(u.Password, []byte(pwd))
+}
+
+func (u *User) Name() string {
+	return u.FirstName + " " + u.LastName
 }
 
 type Admin User
@@ -52,6 +58,7 @@ type Ambassador User
 
 func (a *Ambassador) CalculateRevenue(db *gorm.DB) {
 	var orders []Order
+	fmt.Println(a.ID)
 	// Preloadで他のSQL内のリレーションを事前読み込む
 	db.Preload("OrderItems").Find(&orders, &Order{
 		UserID:   a.ID,
