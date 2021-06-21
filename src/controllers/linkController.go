@@ -99,3 +99,18 @@ func Stats(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(result)
 }
+
+func GetLink(ctx *fiber.Ctx) error {
+	// URL(links/:code)からcodeを取得する
+	code := ctx.Params("code")
+
+	link := models.Link{
+		Code: code,
+	}
+
+	// データベース検索
+	// linkデータを取得する前にUser, Productsデータを取得する
+	database.DB.Preload("User").Preload("Products").First(&link)
+
+	return ctx.JSON(link)
+}
