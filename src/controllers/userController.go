@@ -4,7 +4,9 @@ package controllers
 import (
 	"admin/src/database"
 	"admin/src/models"
+	"context"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,24 +19,25 @@ func Ambassadors(ctx *fiber.Ctx) error {
 }
 
 func Ranking(ctx *fiber.Ctx) error {
-	var users []models.User
+	// zrevrangebyscore
+	//http://mogile.web.fc2.com/redis/commands/zrevrangebyscore.html
+	rankings, err := database.Cache.ZRevRangeByScoreWithScores(
+		context.Background(),
+		"rankings", // updateRankings.goでkeyとして設定した値
+		&redis.ZRangeBy{
+			Min: "-inf",
+			Max: "+inf",
+		}).Result()
 
-	// ambassadorデータを検索
-	database.DB.Find(&users, models.User{
-		IsAmbassador: true,
-	})
-
-	var results []interface{}
-	for _, user := range users {
-		// userにambassadorの型を持たせる
-		ambassador := models.Ambassador(user)
-		// Revenueを計算
-		ambassador.CalculateRevenue(database.DB)
-		// key: ユーザー名, value: お買い上げ金
-		results = append(results, fiber.Map{
-			user.Name(): ambassador.Revenue,
-		})
+	if err != nil {
+		return err
 	}
 
-	return ctx.JSON(results)
+	result := make(map[string]float64)
+
+	for _, ranking := range rankings {
+		result[ranking.Member.(string)] = ranking.Score
+	}
+
+	return ctx.JSON(result)
 }
