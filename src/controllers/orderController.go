@@ -72,15 +72,23 @@ func CreateOrder(ctx *fiber.Ctx) error {
 		Zip:             request.Zip,
 	}
 
+	// トランザクション
+	tx := database.DB.Begin()
 	// OrderをDBに保存
-	database.DB.Create(&order)
+	if err := tx.Create(&order).Error; err != nil {
+		tx.Rollback()
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
 
 	// リクエストからプロダクトを取得
 	for _, requestProduct := range request.Products {
 		product := models.Product{}
 		product.ID = uint(requestProduct["product_id"])
 
-		// productをDBに保存
+		// product検索
 		database.DB.First(&product)
 
 		// トータルを算出
@@ -96,9 +104,19 @@ func CreateOrder(ctx *fiber.Ctx) error {
 			AdminRevenue:      0.9 * total,
 		}
 
+		// トランザクション
 		// OrderItemをDBに保存
-		database.DB.Create(&item)
+		if err := tx.Create(&item).Error; err != nil {
+			tx.Rollback()
+			ctx.Status(fiber.StatusBadRequest)
+			return ctx.JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
 	}
+
+	// 実行
+	tx.Commit()
 
 	return ctx.JSON(order)
 }
