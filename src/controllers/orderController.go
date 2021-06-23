@@ -5,6 +5,7 @@ import (
 	"admin/internal"
 	"admin/src/database"
 	"admin/src/models"
+	"context"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stripe/stripe-go"
@@ -165,4 +166,53 @@ func CreateOrder(ctx *fiber.Ctx) error {
 	tx.Commit()
 
 	return ctx.JSON(source)
+}
+
+func CompleteOrder(ctx *fiber.Ctx) error {
+	var data map[string]string
+
+	// リクエストデータを取得
+	if err := ctx.BodyParser(&data); err != nil {
+		return err
+	}
+
+	order := models.Order{}
+	// OrderItemを検索
+	database.DB.Preload("OrderItems").First(&order, models.Order{
+		TransactionID: data["source"],
+	})
+
+	if order.ID == 0 {
+		ctx.Status((fiber.StatusNotFound))
+		return ctx.JSON(fiber.Map{
+			"message": "オーダーが見つかりません",
+		})
+	}
+
+	// Orderを保存
+	order.Complete = true
+	database.DB.Save(&order)
+
+	// Redisキャッシュに保存したRankingも更新
+	// Rankingはユーザーの購入金額を示す
+	go func(order models.Order) {
+		ambassadorRevenue := 0.0
+		adminRevenue := 0.0
+
+		for _, item := range order.OrderItems {
+			ambassadorRevenue += item.AmbassadorRevenue
+			adminRevenue += item.AdminRevenue
+		}
+
+		user := models.User{}
+		user.ID = order.UserID
+
+		database.DB.First(&user)
+		// https://redis.io/commands/zincrby
+		database.Cache.ZIncrBy(context.Background(), "rankings", ambassadorRevenue, user.Name())
+	}(order)
+
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+	})
 }
