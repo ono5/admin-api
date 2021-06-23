@@ -2,10 +2,13 @@
 package controllers
 
 import (
+	"admin/internal"
 	"admin/src/database"
 	"admin/src/models"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/checkout/session"
 )
 
 func Orders(ctx *fiber.Ctx) error {
@@ -83,6 +86,9 @@ func CreateOrder(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// stripeパラメーター
+	var lineItems []*stripe.CheckoutSessionLineItemParams
+
 	// リクエストからプロダクトを取得
 	for _, requestProduct := range request.Products {
 		product := models.Product{}
@@ -113,10 +119,50 @@ func CreateOrder(ctx *fiber.Ctx) error {
 				"message": err.Error(),
 			})
 		}
+
+		// stripeアイテムセット
+		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+			Name:        stripe.String(product.Title),
+			Description: stripe.String(product.Description),
+			Images:      []*string{stripe.String(product.Image)},
+			Amount:      stripe.Int64(100 * int64(product.Price)),
+			Currency:    stripe.String("usd"),
+			Quantity:    stripe.Int64(int64(requestProduct["quantity"])),
+		})
+	}
+
+	// stripe checkout
+	stripe.Key = internal.StripeSecretKey()
+	params := stripe.CheckoutSessionParams{
+		// http://localhost:5000はフロントエンド側のリンク(まだ作成していない)
+		SuccessURL:         stripe.String("http://localhost:5000/success?source={CHECKOUT_SESSION_ID}"),
+		CancelURL:          stripe.String("http://localhost:5000/error"),
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
+		LineItems:          lineItems,
+	}
+
+	source, err := session.New(&params)
+	if err != nil {
+		tx.Rollback()
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// トランザクションIDを登録
+	order.TransactionID = source.ID
+	// データを書き換えたので、上書き保存
+	if err := tx.Save(&order).Error; err != nil {
+		tx.Rollback()
+		ctx.Status(fiber.StatusBadRequest)
+		return ctx.JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
 
 	// 実行
 	tx.Commit()
 
-	return ctx.JSON(order)
+	return ctx.JSON(source)
 }
