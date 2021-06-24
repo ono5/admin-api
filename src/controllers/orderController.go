@@ -2,8 +2,8 @@
 package controllers
 
 import (
-	"admin/internal"
 	"admin/src/database"
+	"admin/src/internal"
 	"admin/src/models"
 	"context"
 	"fmt"
