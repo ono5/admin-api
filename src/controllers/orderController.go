@@ -6,6 +6,8 @@ import (
 	"admin/src/database"
 	"admin/src/models"
 	"context"
+	"fmt"
+	"net/smtp"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stripe/stripe-go"
@@ -210,6 +212,33 @@ func CompleteOrder(ctx *fiber.Ctx) error {
 		database.DB.First(&user)
 		// https://redis.io/commands/zincrby
 		database.Cache.ZIncrBy(context.Background(), "rankings", ambassadorRevenue, user.Name())
+
+		// Email to ambassador
+		ambassadorMessage := []byte(
+			fmt.Sprintf("貴方の収益は、$%fです。Link: #%s",
+				ambassadorRevenue,
+				order.Code))
+		// MailhogへのPort
+		smtp.SendMail(
+			":1025",                         // 宛先のアドレス
+			nil,                             // Authentication
+			"no-reply@email.com",            // from
+			[]string{order.AmbassadorEmail}, // To
+			ambassadorMessage)               // Message
+
+		// Email to admin
+		adminMessage := []byte(
+			fmt.Sprintf("Order: #%d, Total: %f",
+				order.ID,
+				adminRevenue))
+		// MailhogへのPort
+		smtp.SendMail(
+			":1025",                     // 宛先のアドレス
+			nil,                         // Authentication
+			"no-reply@email.com",        // from
+			[]string{"admin@admin.com"}, // To
+			adminMessage)                // Message
+
 	}(order)
 
 	return ctx.JSON(fiber.Map{
