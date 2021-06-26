@@ -41,3 +41,14 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  admin:
+    build:
+      context: .
+      dockerfile: "./Dockerfile-react-admin"
+    volumes:
+      - ./react-admin:/react-admin
+    command: >
+      sh -c "yarn start"
+    ports:
+      - "3000:3000"
