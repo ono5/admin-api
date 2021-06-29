@@ -10,7 +10,7 @@ class Register extends Component {
 	email = ''
 	password = ''
 	passwordConfirm = ''
-	registerUrl = 'http://localhost:8000/api/admin/register'
+	registerUrl = 'register'
 	state = {
 		redirect: false
 	}
