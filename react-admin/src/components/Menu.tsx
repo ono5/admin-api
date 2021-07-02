@@ -8,7 +8,7 @@ const Menu = () => {
 			<li className="nav-item">
 				<a className="nav-link active" aria-current="page" href="#">
 				<span data-feather="home"></span>
-				Dashboard
+					Dashboard
 				</a>
 			</li>
 			</ul>

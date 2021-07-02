@@ -23,7 +23,7 @@ const Login = () => {
 			// withCredentials
 			// リクエストに Cookie を添えて送信する
 			// API側ではCookieにTokenを保存している
-		}, {withCredentials: true})
+		})
 
 		// リダイレクトフラグをTrue
 		setRedirect(true)

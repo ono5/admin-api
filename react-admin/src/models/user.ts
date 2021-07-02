@@ -18,3 +18,10 @@ export class User {
 		this.password_confirm = password_confirm
 	}
 }
+
+export interface UserProps {
+	id: number
+	first_name: string
+	last_name: string
+	email: string
+}
