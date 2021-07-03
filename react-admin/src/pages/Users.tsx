@@ -1,13 +1,25 @@
 // pages/Users.tsx
 import { useEffect, useState } from 'react'
 import { UserProps } from '../models/user'
-import { Table, TableBody, TableRow, TableHead, TableCell } from '@material-ui/core'
+import {
+	Table,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableFooter,
+	TablePagination
+} from '@material-ui/core'
 import Layout from '../components/Layout'
 import axios from 'axios'
 
 const Users = () => {
-	// 状態管理
 	const [users, setUsers] = useState<UserProps[]>([])
+
+	// ページ情報のState
+	const [page, setPage] = useState(0)
+	const perPage = 10
+
 	let ambassadorsUrl = 'ambassadors'
 
 	useEffect(() => {
@@ -17,8 +29,7 @@ const Users = () => {
 				setUsers(data)
 			}
 		)()
-	}, [])// 第二引数は第一引数に指定した関数の実行タイミングを決める
-	      // 空を渡した場合、マウント・アンマウント時のみ第１引数の関数を実行
+	}, [])
 
 	return (
 		<Layout>
@@ -32,7 +43,8 @@ const Users = () => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{users.map(user => {
+					{/* perPageごとにユーザーをスライス */}
+					{users.slice(page * perPage, (page + 1) * perPage).map(user => {
 						return (
 							<TableRow key={user.id}>
 								<TableCell>{user.id}</TableCell>
@@ -43,6 +55,15 @@ const Users = () => {
 						)
 					})}
 				</TableBody>
+				<TableFooter>
+					<TablePagination
+					  count={users.length}
+					  page={page}
+					  onChangePage={(e, newPage) => setPage(newPage)}
+					  rowsPerPageOptions={[]}
+					  rowsPerPage={perPage}
+					></TablePagination>
+				</TableFooter>
 			</Table>
 		</Layout>
 	)
