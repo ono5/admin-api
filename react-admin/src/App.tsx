@@ -6,6 +6,7 @@ import Users from './pages/Users'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Links from './pages/Links'
+import Products from './pages/products/Products'
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path={'/register'} component={Register}></Route>
         <Route path={'/users'} exact component={Users}></Route>
         <Route path={'/users/:id/links'} component={Links}></Route>
+        <Route path={'/products'} component={Products}></Route>
       </BrowserRouter>
     </div>
   );

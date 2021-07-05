@@ -8,7 +8,12 @@ const Menu = () => {
 				<ul className="nav flex-column">
 					<li className="nav-item">
 						<NavLink to={'/users'} className="nav-link" aria-current="page">
-							<span data-feather="home">Users</span>
+							Users
+						</NavLink>
+					</li>
+					<li className="nav-item">
+						<NavLink to={'/products'} className="nav-link" aria-current="page">
+							Products
 						</NavLink>
 					</li>
 				</ul>
