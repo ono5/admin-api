@@ -9,7 +9,6 @@ import Links from './pages/Links'
 import Products from './pages/products/Products'
 import ProductForm from './pages/products/ProductForm'
 
-
 function App() {
   return (
     <div className="App">
@@ -21,6 +20,7 @@ function App() {
         <Route path={'/users/:id/links'} component={Links}></Route>
         <Route path={'/products'} exact component={Products}></Route>
         <Route path={'/products/create'} component={ProductForm}></Route>
+        <Route path={'/products/:id/edit'} component={ProductForm}></Route>
       </BrowserRouter>
     </div>
   );
