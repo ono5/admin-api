@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import Links from './pages/Links'
 import Products from './pages/products/Products'
 import ProductForm from './pages/products/ProductForm'
+import Orders from './pages/Orders'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path={'/products'} exact component={Products}></Route>
         <Route path={'/products/create'} component={ProductForm}></Route>
         <Route path={'/products/:id/edit'} component={ProductForm}></Route>
+        <Route path={'/orders'} exact component={Orders}></Route>
       </BrowserRouter>
     </div>
   );
