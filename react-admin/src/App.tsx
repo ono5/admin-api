@@ -9,6 +9,7 @@ import Links from './pages/Links'
 import Products from './pages/products/Products'
 import ProductForm from './pages/products/ProductForm'
 import Orders from './pages/Orders'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path={'/products/create'} component={ProductForm}></Route>
         <Route path={'/products/:id/edit'} component={ProductForm}></Route>
         <Route path={'/orders'} exact component={Orders}></Route>
+        <Route path={'/profile'} component={Profile}></Route>
       </BrowserRouter>
     </div>
   );
