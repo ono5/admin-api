@@ -19,9 +19,10 @@ export class User {
 	}
 }
 
-export interface UserProps {
-	id: number
-	first_name: string
-	last_name: string
-	email: string
+// interfeace -> classに変更
+export class UserProps {
+	id!: number
+	first_name!: string
+	last_name!: string
+	email!: string
 }
