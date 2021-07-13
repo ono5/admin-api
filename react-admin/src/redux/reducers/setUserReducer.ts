@@ -1,7 +1,6 @@
 // redux/reducers/setUserReducer.ts
 
 import { UserProps } from "../../models/user"
-import { setUserAction } from "../actions/setUserAction"
 
 const initialState = {
 	user: new UserProps()
