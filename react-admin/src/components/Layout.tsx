@@ -1,7 +1,9 @@
 // components/Layout.tsx
-import { useEffect, useState } from 'react'
+import { Dispatch, useEffect, useState } from 'react'
 import { Redirect } from 'react-router-dom'
+import { connect } from 'react-redux'
 import { UserProps } from '../models/user'
+import { setUserAction } from '../redux/actions/setUserAction'
 import Nav from '../components/Nav'
 import Menu from '../components/Menu'
 import axios from 'axios'
@@ -17,8 +19,7 @@ const Layout = (props: any) => {
 			async () => {
 				try {
 					const { data } = await axios.get(userURL)
-					// User情報をセット
-					setUser(data)
+					props.setUser(data)
 				} catch(e) {
 					setRedirect(true)
 				}
@@ -33,7 +34,7 @@ const Layout = (props: any) => {
 
 	return (
 		<div>
-			<Nav user={user}/>
+			<Nav />
 			<div className="container-fluid">
 				<div className="row">
 					<Menu />
@@ -49,4 +50,16 @@ const Layout = (props: any) => {
 	)
 }
 
-export default Layout
+// State
+const mapStateToProps = (state: {user: UserProps}) => ({
+	user: state.user
+})
+
+// Dispatch
+const mapDispatchToProps = (dispatch: Dispatch<any>) => ({
+	// setUser(Action)->dispatch
+	setUser: (user: UserProps) => dispatch(setUserAction(user))
+})
+
+// LayoutコンポーネントをRedux Storeに登録
+export default connect(mapStateToProps, mapDispatchToProps)(Layout)

@@ -1,4 +1,5 @@
 // src/components/Nav.tsx
+import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { UserProps } from '../models/user'
 import axios from 'axios'
@@ -31,4 +32,6 @@ const Nav = (props: { user: UserProps | null }) => {
 	)
 }
 
-export default Nav
+export default connect( (state: {user: UserProps}) => ({
+	user: state.user
+}))(Nav)
