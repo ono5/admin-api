@@ -52,3 +52,14 @@ services:
       sh -c "yarn start"
     ports:
       - "3000:3000"
+
+  ambassador:
+    build:
+      context: .
+      dockerfile: "./Dockerfile-react-ambassador"
+    volumes:
+      - ./react-ambassador:/react-ambassador
+    command: >
+      sh -c "yarn start"
+    ports:
+      - "4000:3000"
