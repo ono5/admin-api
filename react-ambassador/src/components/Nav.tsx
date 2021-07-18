@@ -1,20 +1,15 @@
 // components/Nav.tsx
-import { useState } from 'react'
+import { Dispatch } from 'react'
 import { connect } from 'react-redux'
 import { User } from '../models/user'
-import { Link, Redirect } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { setUserAction } from '../redux/actions/setUserAction'
 
-const Nav = (props: {user: User}) => {
-	const [redirect, setRedirect] = useState(false)
-
+const Nav = (props: any) => {
 	const logout = async () => {
 		await axios.post('logout')
-		setRedirect(true)
-	}
-
-	if (redirect) {
-		return <Redirect to={'/login'} />
+		props.setUser(null)
 	}
 
 	let menu
@@ -60,5 +55,8 @@ const Nav = (props: {user: User}) => {
 export default connect(
 	(state: {user: User}) => ({
 		user: state.user
-	})
+	}),
+  (dispatch: Dispatch<any>) => ({
+    setUser: (user: User) => dispatch(setUserAction(user))
+  })
 )(Nav)

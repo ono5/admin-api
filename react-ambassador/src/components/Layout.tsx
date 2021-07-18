@@ -1,14 +1,16 @@
 // components/Layout.tsx
-import { Dispatch, useEffect, useState } from 'react'
+import { Dispatch, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { User } from '../models/user'
 import { setUserAction } from '../redux/actions/setUserAction'
+import { useLocation } from 'react-router'
 import Nav from './Nav'
 import Header from './Header'
 import axios from 'axios'
 
 const Layout = (props: any) => {
 	const userURL = 'user'
+	const location = useLocation()
 
 	useEffect(() => {
 		(
@@ -23,11 +25,16 @@ const Layout = (props: any) => {
 		)()
 	}, [])
 
+	let header
+	if (location.pathname === '/' || location.pathname === '/backend') {
+		header = <Header />
+	}
+
 	return (
 		<div>
 			<Nav />
 			<main>
-				<Header />
+				{header}
 				<div className="album py-5 bg-light">
 					<div className="container">
 						{props.children}
