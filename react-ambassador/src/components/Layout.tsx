@@ -1,6 +1,5 @@
 // components/Layout.tsx
 import { Dispatch, useEffect, useState } from 'react'
-import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { User } from '../models/user'
 import { setUserAction } from '../redux/actions/setUserAction'
@@ -10,8 +9,6 @@ import axios from 'axios'
 
 const Layout = (props: any) => {
 	const userURL = 'user'
-	const [redirect, setRedirect] = useState(false)
-	// User情報のState
 
 	useEffect(() => {
 		(
@@ -21,16 +18,10 @@ const Layout = (props: any) => {
 					props.setUser(data)
 				} catch(e) {
 					console.log(e)
-					setRedirect(true)
 				}
 			}
 		)()
 	}, [])
-
-	if (redirect) {
-		// ログイン画面へリダイレクト
-		return <Redirect to={'/login'} />
-	}
 
 	return (
 		<div>
