@@ -1,20 +1,20 @@
-// pages/ProductsFrontend.tsx
+// pages/ProductsBackend.tsx
 import { useEffect, useState } from 'react'
 import { Product } from '../models/product'
 import Layout from '../components/Layout'
 import Products from '../pages/Products'
 import axios from 'axios'
 
-const ProductsFrontend = () => {
-	const backendUrl = 'products/frontend'
+const ProductsBackend = () => {
+	const backendUrl = 'products/backend'
 	const [products, setProducts] = useState<Product[]>([])
 
 	useEffect(() => {
 		(
 			async () => {
 				const {data} = await axios.get(backendUrl)
-				if (data) {
-					setProducts(data)
+				if (data.data) {
+					setProducts(data.data)
 				}
 			}
 		)()
@@ -27,4 +27,4 @@ const ProductsFrontend = () => {
 	)
 }
 
-export default ProductsFrontend
+export default ProductsBackend
