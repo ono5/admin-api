@@ -13,7 +13,11 @@ const ProductsFrontend = () => {
 	const [filters, setFilters] = useState<Filters>({
 		q: '',
 		sort: '',
+		page: 1,
 	})
+	const [lastPage, setLastPage] = useState(0)
+
+	const perPage = 9
 
 	useEffect(() => {
 		(
@@ -22,6 +26,7 @@ const ProductsFrontend = () => {
 				if (data) {
 					setAllProducts(data)
 					setFilterProducts(data)
+					setLastPage(Math.ceil(data.length / perPage))
 				}
 			}
 		)()
@@ -56,7 +61,9 @@ const ProductsFrontend = () => {
 				return 0
 			})
 		}
-		setFilterProducts(products)
+
+		setLastPage(Math.ceil(products.length / perPage))
+		setFilterProducts(products.slice(0, filters.page * perPage))
 	}, [filters])
 
 	return (
@@ -65,6 +72,7 @@ const ProductsFrontend = () => {
 				products={filterProducts}
 				filters={filters}
 				setFilters={setFilters}
+				lastPage={lastPage}
 			/>
 		</Layout>
 	)

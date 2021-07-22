@@ -12,7 +12,9 @@ const ProductsBackend = () => {
 	const [filters, setFilters] = useState<Filters>({
 		q: '',
 		sort: '',
+		page: 1,
 	})
+	const [lastPage, setLastPage] = useState(0)
 
 	useEffect(() => {
 		(
@@ -27,11 +29,17 @@ const ProductsBackend = () => {
 					arr.push(`sort=${filters.sort}`)
 				}
 
+				if (filters.page) {
+					arr.push(`page=${filters.page}`)
+				}
+
 				const {data} = await axios.get(
 					backendUrl + '?' + arr.join('&'))
 
 				if (data.data) {
-					setProducts(data.data)
+					console.log(data)
+					setProducts(filters.page === 1 ? data.data : [...products, ...data.data])
+					setLastPage(data.last_page);
 				}
 			}
 		)()
@@ -43,6 +51,7 @@ const ProductsBackend = () => {
 				products={products}
 				filters={filters}
 				setFilters={setFilters}
+				lastPage={lastPage}
 			/>
 		</Layout>
 	)
