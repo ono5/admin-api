@@ -10,7 +10,8 @@ const ProductsBackend = () => {
 	const backendUrl = 'products/backend'
 	const [products, setProducts] = useState<Product[]>([])
 	const [filters, setFilters] = useState<Filters>({
-		q: ''
+		q: '',
+		sort: '',
 	})
 
 	useEffect(() => {
@@ -20,6 +21,10 @@ const ProductsBackend = () => {
 
 				if (filters.q) {
 					arr.push(`q=${filters.q}`)
+				}
+
+				if (filters.sort) {
+					arr.push(`sort=${filters.sort}`)
 				}
 
 				const {data} = await axios.get(
