@@ -63,3 +63,14 @@ services:
       sh -c "yarn start"
     ports:
       - "4000:3000"
+
+  checkout:
+    build:
+      context: .
+      dockerfile: "./Dockerfile-nextjs-checkout"
+    volumes:
+      - ./next-checkout:/next-checkout
+    command: >
+      sh -c "npm run dev"
+    ports:
+      - "5000:3000"
