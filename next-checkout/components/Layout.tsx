@@ -10,6 +10,7 @@ const Layout = (props) => {
 				rel="stylesheet"
 				integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
 				crossOrigin="anonymous" />
+				<script src="https://js.stripe.com/v3/"></script>
 			</Head>
 			<div className="container">
 				{props.children}

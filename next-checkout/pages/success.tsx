@@ -1,7 +1,24 @@
 // pages/success.tsx
+import { useEffect } from 'react'
+import { useRouter } from 'next/dist/client/router'
 import Layout from '../components/Layout'
+import axios from 'axios'
+import constants  from '../constants'
 
 const Success = () => {
+	const router = useRouter()
+	const {source} = router.query
+	useEffect(() => {
+		if (source !== undefined) {
+			(
+				async () => {
+					await axios.post(`${constants.endpoint}/orders/confirm`,{
+						source
+					})
+				}
+			)()
+		}
+	})
 	return (
 		<Layout>
 			<div className="py-5 text-center">
